@@ -1,0 +1,165 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  background: #f1f5f9;
+  color: #1e293b;
+  min-height: 100vh;
+}
+
+.app {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 32px 16px 64px;
+}
+
+/* ヘッダー */
+.app-header {
+  margin-bottom: 32px;
+  text-align: center;
+}
+
+.app-header h1 {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.app-subtitle {
+  margin-top: 4px;
+  font-size: 0.95rem;
+  color: #64748b;
+}
+
+/* グリッド */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.summary-card {
+  grid-column: 1 / -1;
+}
+
+/* カード */
+.budget-card {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+
+.budget-card-title {
+  font-size: 1rem;
+  font-weight: 600;
+  padding-bottom: 12px;
+  margin-bottom: 16px;
+  border-bottom: 3px solid #94a3b8;
+  color: #0f172a;
+}
+
+/* テーブル */
+.budget-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.budget-table thead th {
+  text-align: left;
+  padding: 6px 8px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.budget-table tbody td {
+  padding: 10px 8px;
+  border-bottom: 1px solid #f1f5f9;
+  color: #334155;
+}
+
+.budget-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.budget-table tfoot td {
+  padding: 12px 8px 0;
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: #0f172a;
+  border-top: 2px solid #e2e8f0;
+}
+
+.amount-col {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.note-col {
+  font-size: 0.8rem;
+  color: #94a3b8;
+}
+
+/* サマリー行スタイル */
+.summary-row td {
+  padding: 10px 8px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.summary-row--income td {
+  color: #16a34a;
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.summary-row--expense td {
+  color: #64748b;
+}
+
+.summary-row--total-expense td {
+  color: #dc2626;
+  font-weight: 600;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.summary-row--free td {
+  color: #2563eb;
+  font-weight: 600;
+  font-size: 1rem;
+  padding-top: 14px;
+}
+
+.summary-row--sub td {
+  color: #64748b;
+  font-size: 0.88rem;
+}
+
+.summary-row--remaining td {
+  color: #7c3aed;
+  font-weight: 700;
+  font-size: 1rem;
+  border-top: 2px solid #e2e8f0;
+  border-bottom: none;
+  padding-top: 14px;
+}
+
+/* レスポンシブ */
+@media (max-width: 680px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .summary-card {
+    grid-column: 1;
+  }
+}
