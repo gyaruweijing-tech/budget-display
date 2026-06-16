@@ -21,3 +21,6 @@ export const investmentItems = [
   { label: "投資（最低）", amount: 10000 },
   { label: "個別株（目標）", amount: 20000 },
 ];
+export const slackItems = [
+  { label: "娯楽費", amount: 20000 },
+];

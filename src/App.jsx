@@ -7,6 +7,7 @@ import {
   semiFixedCosts as initialSemi,
   monthlyIncome as initialIncome,
   investmentItems as initialInvestments,
+  slackItems as initialSlack,
 } from "./data/budget";
 import "./App.css";
 
@@ -15,8 +16,8 @@ const App = () => {
   const [semiFixedCosts, setSemiFixedCosts] = useState(initialSemi);
   const [monthlyIncome, setMonthlyIncome] = useState(initialIncome);
   const [investments, setInvestments] = useState(initialInvestments);
+  const [slackItems, setSlackItems] = useState(initialSlack);
 
-  // modal state: { target: "fixed"|"semi"|"investment"|"income", mode: "edit"|"add", index: number|null }
   const [modal, setModal] = useState(null);
 
   const fixedTotal = fixedCosts.reduce((sum, i) => sum + i.amount, 0);
@@ -26,13 +27,15 @@ const App = () => {
   const getList = (target) => {
     if (target === "fixed") return fixedCosts;
     if (target === "semi") return semiFixedCosts;
-    return investments;
+    if (target === "investment") return investments;
+    return slackItems;
   };
 
   const setList = (target) => {
     if (target === "fixed") return setFixedCosts;
     if (target === "semi") return setSemiFixedCosts;
-    return setInvestments;
+    if (target === "investment") return setInvestments;
+    return setSlackItems;
   };
 
   const handleDelete = (target, index) => {
@@ -94,10 +97,14 @@ const App = () => {
           semiFixedTotal={semiFixedTotal}
           investments={investments}
           investmentTotal={investmentTotal}
+          slackItems={slackItems}
           onEditIncome={() => setModal({ target: "income", mode: "edit", index: null })}
           onEditInvestment={(i) => setModal({ target: "investment", mode: "edit", index: i })}
           onDeleteInvestment={(i) => handleDelete("investment", i)}
           onAddInvestment={() => setModal({ target: "investment", mode: "add", index: null })}
+          onEditSlack={(i) => setModal({ target: "slack", mode: "edit", index: i })}
+          onDeleteSlack={(i) => handleDelete("slack", i)}
+          onAddSlack={() => setModal({ target: "slack", mode: "add", index: null })}
         />
       </main>
 
