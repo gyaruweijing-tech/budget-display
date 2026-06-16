@@ -2,26 +2,16 @@ const SummaryPanel = ({
   income,
   fixedTotal,
   semiFixedTotal,
-  minInvestment,
-  stockTarget,
+  investments,
+  investmentTotal,
   onEditIncome,
-  onEditMinInvestment,
-  onEditStockTarget,
+  onEditInvestment,
+  onDeleteInvestment,
+  onAddInvestment,
 }) => {
   const totalExpense = fixedTotal + semiFixedTotal;
   const freeAmount = income - totalExpense;
-  const remaining = freeAmount - minInvestment - stockTarget;
-
-  const rows = [
-    { label: "月収（想定）", amount: income, type: "income", onEdit: onEditIncome },
-    { label: "固定費", amount: -fixedTotal, type: "expense" },
-    { label: "準固定費", amount: -semiFixedTotal, type: "expense" },
-    { label: "支出合計", amount: -totalExpense, type: "total-expense" },
-    { label: "自由に使えるお金", amount: freeAmount, type: "free" },
-    { label: "　└ 投資（最低）", amount: -minInvestment, type: "sub", onEdit: onEditMinInvestment },
-    { label: "　└ 個別株（目標）", amount: -stockTarget, type: "sub", onEdit: onEditStockTarget },
-    { label: "残り（娯楽・交際費など）", amount: remaining, type: "remaining" },
-  ];
+  const remaining = freeAmount - investmentTotal;
 
   return (
     <div className="budget-card summary-card">
@@ -30,22 +20,58 @@ const SummaryPanel = ({
       </h2>
       <table className="budget-table">
         <tbody>
-          {rows.map((row) => (
-            <tr key={row.label} className={`summary-row summary-row--${row.type}`}>
-              <td>{row.label}</td>
-              <td className="amount-col">
-                {row.amount >= 0 ? "¥" : "－¥"}
-                {Math.abs(row.amount).toLocaleString()}
-              </td>
+          <tr className="summary-row summary-row--income">
+            <td>月収（想定）</td>
+            <td className="amount-col">¥{income.toLocaleString()}</td>
+            <td className="action-col">
+              <button className="btn-icon" onClick={onEditIncome} title="編集">✎</button>
+            </td>
+          </tr>
+          <tr className="summary-row summary-row--expense">
+            <td>固定費</td>
+            <td className="amount-col">－¥{fixedTotal.toLocaleString()}</td>
+            <td className="action-col"></td>
+          </tr>
+          <tr className="summary-row summary-row--expense">
+            <td>準固定費</td>
+            <td className="amount-col">－¥{semiFixedTotal.toLocaleString()}</td>
+            <td className="action-col"></td>
+          </tr>
+          <tr className="summary-row summary-row--total-expense">
+            <td>支出合計</td>
+            <td className="amount-col">－¥{totalExpense.toLocaleString()}</td>
+            <td className="action-col"></td>
+          </tr>
+          <tr className="summary-row summary-row--free">
+            <td>自由に使えるお金</td>
+            <td className="amount-col">¥{freeAmount.toLocaleString()}</td>
+            <td className="action-col"></td>
+          </tr>
+
+          {investments.map((inv, i) => (
+            <tr key={i} className="summary-row summary-row--sub">
+              <td>　└ {inv.label}</td>
+              <td className="amount-col">－¥{inv.amount.toLocaleString()}</td>
               <td className="action-col">
-                {row.onEdit && (
-                  <button className="btn-icon" onClick={row.onEdit} title="編集">
-                    ✎
-                  </button>
-                )}
+                <button className="btn-icon" onClick={() => onEditInvestment(i)} title="編集">✎</button>
+                <button className="btn-icon btn-icon--danger" onClick={() => onDeleteInvestment(i)} title="削除">✕</button>
               </td>
             </tr>
           ))}
+
+          <tr className="summary-row summary-row--sub-add">
+            <td colSpan={3}>
+              <button className="btn-add" onClick={onAddInvestment}>＋ 投資項目を追加</button>
+            </td>
+          </tr>
+
+          <tr className="summary-row summary-row--remaining">
+            <td>残り（娯楽・交際費など）</td>
+            <td className="amount-col">
+              {remaining >= 0 ? "¥" : "－¥"}{Math.abs(remaining).toLocaleString()}
+            </td>
+            <td className="action-col"></td>
+          </tr>
         </tbody>
       </table>
     </div>

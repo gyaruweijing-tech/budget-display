@@ -6,8 +6,7 @@ import {
   fixedCosts as initialFixed,
   semiFixedCosts as initialSemi,
   monthlyIncome as initialIncome,
-  minInvestment as initialMinInv,
-  stockTarget as initialStock,
+  investmentItems as initialInvestments,
 } from "./data/budget";
 import "./App.css";
 
@@ -15,20 +14,26 @@ const App = () => {
   const [fixedCosts, setFixedCosts] = useState(initialFixed);
   const [semiFixedCosts, setSemiFixedCosts] = useState(initialSemi);
   const [monthlyIncome, setMonthlyIncome] = useState(initialIncome);
-  const [minInvestment, setMinInvestment] = useState(initialMinInv);
-  const [stockTarget, setStockTarget] = useState(initialStock);
+  const [investments, setInvestments] = useState(initialInvestments);
 
-  // modal state: { target: "fixed"|"semi"|"income"|"investment", mode: "edit"|"add", index: number|null }
+  // modal state: { target: "fixed"|"semi"|"investment"|"income", mode: "edit"|"add", index: number|null }
   const [modal, setModal] = useState(null);
 
   const fixedTotal = fixedCosts.reduce((sum, i) => sum + i.amount, 0);
   const semiFixedTotal = semiFixedCosts.reduce((sum, i) => sum + i.amount, 0);
+  const investmentTotal = investments.reduce((sum, i) => sum + i.amount, 0);
 
-  const getList = (target) => (target === "fixed" ? fixedCosts : semiFixedCosts);
-  const setList = (target) => (target === "fixed" ? setFixedCosts : setSemiFixedCosts);
+  const getList = (target) => {
+    if (target === "fixed") return fixedCosts;
+    if (target === "semi") return semiFixedCosts;
+    return investments;
+  };
 
-  const openEdit = (target, index) => setModal({ target, mode: "edit", index });
-  const openAdd = (target) => setModal({ target, mode: "add", index: null });
+  const setList = (target) => {
+    if (target === "fixed") return setFixedCosts;
+    if (target === "semi") return setSemiFixedCosts;
+    return setInvestments;
+  };
 
   const handleDelete = (target, index) => {
     const list = [...getList(target)];
@@ -38,13 +43,8 @@ const App = () => {
 
   const handleSave = (saved) => {
     const { target, mode, index } = modal;
-
     if (target === "income") {
       setMonthlyIncome(saved.amount);
-    } else if (target === "minInvestment") {
-      setMinInvestment(saved.amount);
-    } else if (target === "stockTarget") {
-      setStockTarget(saved.amount);
     } else {
       const list = [...getList(target)];
       if (mode === "edit") {
@@ -57,16 +57,11 @@ const App = () => {
     setModal(null);
   };
 
-  const hasNote = modal && (modal.target === "semi");
   const modalItem =
     modal?.mode === "edit" && modal.index !== null
       ? getList(modal.target)[modal.index]
       : modal?.target === "income"
       ? { label: "月収（想定）", amount: monthlyIncome }
-      : modal?.target === "minInvestment"
-      ? { label: "投資（最低）", amount: minInvestment }
-      : modal?.target === "stockTarget"
-      ? { label: "個別株（目標）", amount: stockTarget }
       : null;
 
   return (
@@ -81,29 +76,28 @@ const App = () => {
           title="固定費（絶対にかかるもの）"
           items={fixedCosts}
           accentColor="#ef4444"
-          target="fixed"
-          onEdit={(i) => openEdit("fixed", i)}
+          onEdit={(i) => setModal({ target: "fixed", mode: "edit", index: i })}
           onDelete={(i) => handleDelete("fixed", i)}
-          onAdd={() => openAdd("fixed")}
+          onAdd={() => setModal({ target: "fixed", mode: "add", index: null })}
         />
         <BudgetTable
           title="準固定費（絶対に使いたいもの）"
           items={semiFixedCosts}
           accentColor="#f97316"
-          target="semi"
-          onEdit={(i) => openEdit("semi", i)}
+          onEdit={(i) => setModal({ target: "semi", mode: "edit", index: i })}
           onDelete={(i) => handleDelete("semi", i)}
-          onAdd={() => openAdd("semi")}
+          onAdd={() => setModal({ target: "semi", mode: "add", index: null })}
         />
         <SummaryPanel
           income={monthlyIncome}
           fixedTotal={fixedTotal}
           semiFixedTotal={semiFixedTotal}
-          minInvestment={minInvestment}
-          stockTarget={stockTarget}
+          investments={investments}
+          investmentTotal={investmentTotal}
           onEditIncome={() => setModal({ target: "income", mode: "edit", index: null })}
-          onEditMinInvestment={() => setModal({ target: "minInvestment", mode: "edit", index: null })}
-          onEditStockTarget={() => setModal({ target: "stockTarget", mode: "edit", index: null })}
+          onEditInvestment={(i) => setModal({ target: "investment", mode: "edit", index: i })}
+          onDeleteInvestment={(i) => handleDelete("investment", i)}
+          onAddInvestment={() => setModal({ target: "investment", mode: "add", index: null })}
         />
       </main>
 
@@ -111,7 +105,7 @@ const App = () => {
         <EditModal
           mode={modal.mode}
           item={modalItem}
-          hasNote={hasNote}
+          hasNote={modal.target === "semi"}
           onSave={handleSave}
           onClose={() => setModal(null)}
         />
