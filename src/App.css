@@ -153,6 +153,158 @@ body {
   padding-top: 14px;
 }
 
+/* カードヘッダー（タイトル＋追加ボタン） */
+.budget-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 0;
+}
+
+.budget-card-header .budget-card-title {
+  margin-bottom: 16px;
+  flex: 1;
+}
+
+/* アクション列 */
+.action-col {
+  width: 64px;
+  text-align: right;
+  white-space: nowrap;
+}
+
+/* アイコンボタン（編集・削除） */
+.btn-icon {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 2px 4px;
+  font-size: 0.85rem;
+  color: #94a3b8;
+  border-radius: 4px;
+  transition: color 0.15s, background 0.15s;
+}
+
+.btn-icon:hover {
+  color: #334155;
+  background: #f1f5f9;
+}
+
+.btn-icon--danger:hover {
+  color: #dc2626;
+  background: #fee2e2;
+}
+
+/* 追加ボタン */
+.btn-add {
+  background: none;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 0.78rem;
+  color: #64748b;
+  cursor: pointer;
+  white-space: nowrap;
+  margin-top: 2px;
+  transition: background 0.15s, color 0.15s;
+}
+
+.btn-add:hover {
+  background: #f8fafc;
+  color: #0f172a;
+}
+
+/* モーダル */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.modal {
+  background: #fff;
+  border-radius: 14px;
+  padding: 28px 28px 24px;
+  width: 360px;
+  max-width: calc(100vw - 32px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+}
+
+.modal-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 20px;
+}
+
+.modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.modal-label {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #475569;
+}
+
+.modal-input {
+  padding: 8px 10px;
+  border: 1px solid #e2e8f0;
+  border-radius: 7px;
+  font-size: 0.9rem;
+  color: #0f172a;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.modal-input:focus {
+  border-color: #6366f1;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.btn {
+  padding: 8px 18px;
+  border-radius: 7px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: background 0.15s;
+}
+
+.btn-cancel {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.btn-cancel:hover {
+  background: #e2e8f0;
+}
+
+.btn-save {
+  background: #6366f1;
+  color: #fff;
+}
+
+.btn-save:hover {
+  background: #4f46e5;
+}
+
 /* レスポンシブ */
 @media (max-width: 680px) {
   .dashboard-grid {

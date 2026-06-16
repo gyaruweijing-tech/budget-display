@@ -1,16 +1,25 @@
-const SummaryPanel = ({ income, fixedTotal, semiFixedTotal, minInvestment, stockTarget }) => {
+const SummaryPanel = ({
+  income,
+  fixedTotal,
+  semiFixedTotal,
+  minInvestment,
+  stockTarget,
+  onEditIncome,
+  onEditMinInvestment,
+  onEditStockTarget,
+}) => {
   const totalExpense = fixedTotal + semiFixedTotal;
   const freeAmount = income - totalExpense;
   const remaining = freeAmount - minInvestment - stockTarget;
 
   const rows = [
-    { label: "月収（想定）", amount: income, type: "income" },
+    { label: "月収（想定）", amount: income, type: "income", onEdit: onEditIncome },
     { label: "固定費", amount: -fixedTotal, type: "expense" },
     { label: "準固定費", amount: -semiFixedTotal, type: "expense" },
     { label: "支出合計", amount: -totalExpense, type: "total-expense" },
     { label: "自由に使えるお金", amount: freeAmount, type: "free" },
-    { label: "　└ 投資（最低）", amount: -minInvestment, type: "sub" },
-    { label: "　└ 個別株（目標）", amount: -stockTarget, type: "sub" },
+    { label: "　└ 投資（最低）", amount: -minInvestment, type: "sub", onEdit: onEditMinInvestment },
+    { label: "　└ 個別株（目標）", amount: -stockTarget, type: "sub", onEdit: onEditStockTarget },
     { label: "残り（娯楽・交際費など）", amount: remaining, type: "remaining" },
   ];
 
@@ -27,6 +36,13 @@ const SummaryPanel = ({ income, fixedTotal, semiFixedTotal, minInvestment, stock
               <td className="amount-col">
                 {row.amount >= 0 ? "¥" : "－¥"}
                 {Math.abs(row.amount).toLocaleString()}
+              </td>
+              <td className="action-col">
+                {row.onEdit && (
+                  <button className="btn-icon" onClick={row.onEdit} title="編集">
+                    ✎
+                  </button>
+                )}
               </td>
             </tr>
           ))}
