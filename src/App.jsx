@@ -2,6 +2,7 @@ import { useState } from "react";
 import BudgetTable from "./components/BudgetTable";
 import SummaryPanel from "./components/SummaryPanel";
 import EditModal from "./components/EditModal";
+import { usePersistentState } from "./usePersistentState";
 import {
   fixedCosts as initialFixed,
   semiFixedCosts as initialSemi,
@@ -12,11 +13,11 @@ import {
 import "./App.css";
 
 const App = () => {
-  const [fixedCosts, setFixedCosts] = useState(initialFixed);
-  const [semiFixedCosts, setSemiFixedCosts] = useState(initialSemi);
-  const [monthlyIncome, setMonthlyIncome] = useState(initialIncome);
-  const [investments, setInvestments] = useState(initialInvestments);
-  const [slackItems, setSlackItems] = useState(initialSlack);
+  const [fixedCosts, setFixedCosts] = usePersistentState("budget:fixed", initialFixed);
+  const [semiFixedCosts, setSemiFixedCosts] = usePersistentState("budget:semi", initialSemi);
+  const [monthlyIncome, setMonthlyIncome] = usePersistentState("budget:income", initialIncome);
+  const [investments, setInvestments] = usePersistentState("budget:investments", initialInvestments);
+  const [slackItems, setSlackItems] = usePersistentState("budget:slack", initialSlack);
 
   const [modal, setModal] = useState(null);
 
