@@ -2,6 +2,7 @@ import { useState } from "react";
 import BudgetTable from "./components/BudgetTable";
 import SummaryPanel from "./components/SummaryPanel";
 import EditModal from "./components/EditModal";
+import BankBalanceCard from "./components/BankBalanceCard";
 import { usePersistentState } from "./usePersistentState";
 import {
   fixedCosts as initialFixed,
@@ -76,6 +77,7 @@ const App = () => {
       </header>
 
       <main className="dashboard-grid">
+        <BankBalanceCard />
         <BudgetTable
           title="固定費（絶対にかかるもの）"
           items={fixedCosts}
