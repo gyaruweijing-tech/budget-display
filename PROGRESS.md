@@ -16,19 +16,24 @@
   - 入金は毎週木曜の自動加算（¥30,000）
   - Gmail検索は直近14日のみ＋承認番号で重複防止（軽量）
   - `doGet` で残高＋直近取引をJSONで返す（TOKENで保護）
-- **React側**: `src/components/BankBalanceCard.jsx` … GASのURLを叩いて残高表示＋🔄更新ボタン
-  - 接続情報は `.env.local`（gitに上げない）の `VITE_GAS_URL` / `VITE_GAS_TOKEN`
+- **React側**: `src/components/BankBalanceCard.jsx` … `/api/balance` を叩いて残高表示＋🔄更新ボタン
+
+## セキュリティ改修（2026-06-28）— フロントに秘密を置かない
+旧構成は `VITE_GAS_URL` / `VITE_GAS_TOKEN` をフロントで使っており、**ビルドでJSバンドルに焼き込まれ公開状態だった**（GAS URL・トークンが誰でも読めた）。サーバーレス関数プロキシ方式に変更。
+
+- **A（トークンのローテーション）**: 漏れていた旧トークンをGAS側で新しい文字列に変更し再デプロイ → 旧トークンを無効化。
+- **B（サーバーレスで隠す）**:
+  - `api/balance.js`（Vercel関数）が `process.env.GAS_URL` / `process.env.GAS_TOKEN`（**VITE_なし=サーバー専用**）でGASを叩き、結果だけ返す。
+  - フロントは `/api/balance` を叩くだけ。**トークンはブラウザに一切渡らない**＝バンドルから秘密が消える。
+  - Vercel環境変数は `GAS_URL` / `GAS_TOKEN`（VITE_なし）に。旧 `VITE_GAS_*` は削除。
 
 ## デプロイ
-- 本番は **Vercel**（スマホからPWAとして利用）
-- 残高連携の接続情報は環境変数 `VITE_GAS_URL` / `VITE_GAS_TOKEN`
-  - ローカル: `.env.local` または `setx`（gitに上げない）
-  - 本番: Vercelの Environment Variables に設定 → 再デプロイで反映
-- セキュリティ方針: **公開のまま**（残高は読み取り専用・低リスクと判断。URLを知る人には残高が見える点は許容）
+- 本番は **Vercel**（スマホからPWAとして利用、`api/` で関数も動く）
+- ローカルで関数込み確認は `vercel dev`（plain `vite` だと `/api` が無いので注意）
 
 ## 残タスク
-- [x] GASをWebアプリとして公開しURLを取得
-- [x] ローカルで残高表示を確認
+- [ ] A: GASエディタで TOKEN を新トークンに変更 → 既存デプロイを「新バージョン」で更新
+- [ ] B: Vercelに `GAS_URL` / `GAS_TOKEN`（新トークン）を追加、旧 `VITE_GAS_*` を削除 → 再デプロイ
+- [ ] 本番で残高が出るか＆バンドルにトークンが無いか（DevToolsで検索）確認
 - [ ] GASで `createTrigger` を実行（6時間ごとの自動更新ON）
-- [ ] Vercelに環境変数を設定 → git push で本番反映
-- [ ] スマホ本番で残高が出るか確認
+- [x] GASをWebアプリとして公開しURLを取得 / ローカルで残高表示を確認

@@ -1,8 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 
-const GAS_URL = import.meta.env.VITE_GAS_URL;
-const GAS_TOKEN = import.meta.env.VITE_GAS_TOKEN;
-
+// 秘密はフロントに置かない。サーバーレス関数 /api/balance 経由で取得する。
 const fmtDate = (d) => {
   const date = new Date(d);
   if (isNaN(date.getTime())) return String(d || "");
@@ -20,16 +18,11 @@ const BankBalanceCard = () => {
   const [showTx, setShowTx] = useState(false);
 
   const fetchBalance = useCallback(async () => {
-    if (!GAS_URL) {
-      setStatus("error");
-      setError(".env.local または環境変数に VITE_GAS_URL を設定してください");
-      return;
-    }
     setStatus("loading");
     setError("");
     try {
-      const url = `${GAS_URL}?token=${encodeURIComponent(GAS_TOKEN || "")}`;
-      const res = await fetch(url);
+      // トークンはサーバー側(/api/balance)が持つ。ブラウザは秘密を一切知らない。
+      const res = await fetch("/api/balance");
       const json = await res.json();
       if (json.error) throw new Error(json.error);
       setData(json);
