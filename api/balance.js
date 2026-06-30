@@ -14,12 +14,15 @@ export default async function handler(req, res) {
   try {
     const q = req.query || {};
     // GASに渡す追加パラメータ（開いただけのときは何も付けない＝読み取り専用）
-    // ・refresh=1     … 🔄ボタン：メール取り込みを実行
-    // ・action=addIncome&amount=… … ＋入金ボタン：入金を1件追加
+    // ・refresh=1                       … 🔄ボタン：メール取り込みを実行
+    // ・action=addIncome&amount=…       … ＋入金ボタン：残高に足す
+    // ・action=subtract&amount=…        … －減らすボタン：残高から引く
+    // ・action=setBalance&amount=…      … 残高を直接セット
+    const ALLOWED_ACTIONS = ["addIncome", "subtract", "setBalance"];
     const extra = [];
     if (q.refresh === "1") extra.push("refresh=1");
-    if (q.action === "addIncome") {
-      extra.push("action=addIncome");
+    if (ALLOWED_ACTIONS.includes(q.action)) {
+      extra.push(`action=${q.action}`);
       if (q.amount != null) extra.push(`amount=${encodeURIComponent(q.amount)}`);
     }
     const suffix = extra.length ? `&${extra.join("&")}` : "";
