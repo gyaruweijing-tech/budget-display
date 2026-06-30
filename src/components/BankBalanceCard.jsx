@@ -17,12 +17,14 @@ const BankBalanceCard = () => {
   const [error, setError] = useState("");
   const [showTx, setShowTx] = useState(false);
 
-  const fetchBalance = useCallback(async () => {
+  // refresh=true（🔄ボタン）のときだけメール取り込みを実行。
+  // 初回ロードは読み取り専用なので、開くたびに残高がブレない。
+  const fetchBalance = useCallback(async (refresh = false) => {
     setStatus("loading");
     setError("");
     try {
       // トークンはサーバー側(/api/balance)が持つ。ブラウザは秘密を一切知らない。
-      const res = await fetch("/api/balance");
+      const res = await fetch(refresh ? "/api/balance?refresh=1" : "/api/balance");
       const json = await res.json();
       if (json.error) throw new Error(json.error);
       setData(json);
@@ -34,8 +36,31 @@ const BankBalanceCard = () => {
   }, []);
 
   useEffect(() => {
-    fetchBalance();
+    fetchBalance(false); // 開いたときは読むだけ（取り込みはしない）
   }, [fetchBalance]);
+
+  // ＋入金ボタン：金額を聞いて（初期値3万）入金を1件追加する。
+  const addIncome = useCallback(async () => {
+    const input = window.prompt("入金額を入力（円）", "30000");
+    if (input == null) return; // キャンセル
+    const amount = Math.round(Number(input.replace(/[^\d.-]/g, "")));
+    if (!amount) {
+      window.alert("金額が正しくありません");
+      return;
+    }
+    setStatus("loading");
+    setError("");
+    try {
+      const res = await fetch(`/api/balance?action=addIncome&amount=${amount}`);
+      const json = await res.json();
+      if (json.error) throw new Error(json.error);
+      setData(json);
+      setStatus("idle");
+    } catch (e) {
+      setStatus("error");
+      setError(String(e.message || e));
+    }
+  }, []);
 
   const balance = data?.balance;
   const txs = data?.transactions || [];
@@ -46,9 +71,14 @@ const BankBalanceCard = () => {
         <h2 className="budget-card-title" style={{ borderColor: "#0ea5e9" }}>
           銀行 残高
         </h2>
-        <button className="btn-add" onClick={fetchBalance} disabled={status === "loading"}>
-          {status === "loading" ? "更新中…" : "🔄 更新"}
-        </button>
+        <div className="bank-actions">
+          <button className="btn-add" onClick={addIncome} disabled={status === "loading"}>
+            ＋ 入金
+          </button>
+          <button className="btn-add" onClick={() => fetchBalance(true)} disabled={status === "loading"}>
+            {status === "loading" ? "更新中…" : "🔄 更新"}
+          </button>
+        </div>
       </div>
 
       {status === "error" ? (

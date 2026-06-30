@@ -12,7 +12,18 @@ export default async function handler(req, res) {
   }
 
   try {
-    const url = `${GAS_URL}?token=${encodeURIComponent(GAS_TOKEN)}`;
+    const q = req.query || {};
+    // GASに渡す追加パラメータ（開いただけのときは何も付けない＝読み取り専用）
+    // ・refresh=1     … 🔄ボタン：メール取り込みを実行
+    // ・action=addIncome&amount=… … ＋入金ボタン：入金を1件追加
+    const extra = [];
+    if (q.refresh === "1") extra.push("refresh=1");
+    if (q.action === "addIncome") {
+      extra.push("action=addIncome");
+      if (q.amount != null) extra.push(`amount=${encodeURIComponent(q.amount)}`);
+    }
+    const suffix = extra.length ? `&${extra.join("&")}` : "";
+    const url = `${GAS_URL}?token=${encodeURIComponent(GAS_TOKEN)}${suffix}`;
     const r = await fetch(url);
     const json = await r.json();
     // GAS側のエラーもそのまま返す
