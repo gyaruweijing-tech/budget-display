@@ -17,14 +17,12 @@ const BankBalanceCard = () => {
   const [error, setError] = useState("");
   const [showTx, setShowTx] = useState(false);
 
-  // refresh=true（🔄ボタン）のときだけメール取り込みを実行。
-  // 初回ロードは読み取り専用なので、開くたびに残高がブレない。
-  const fetchBalance = useCallback(async (refresh = false) => {
+  // /api/balance を叩く共通処理（トークンはサーバー側が持つ＝ブラウザは秘密を知らない）。
+  const callApi = useCallback(async (query = "") => {
     setStatus("loading");
     setError("");
     try {
-      // トークンはサーバー側(/api/balance)が持つ。ブラウザは秘密を一切知らない。
-      const res = await fetch(refresh ? "/api/balance?refresh=1" : "/api/balance");
+      const res = await fetch(`/api/balance${query}`);
       const json = await res.json();
       if (json.error) throw new Error(json.error);
       setData(json);
@@ -34,36 +32,45 @@ const BankBalanceCard = () => {
       setError(String(e.message || e));
     }
   }, []);
+
+  // 開いただけ＝読むだけ（残高はブレない）。🔄ボタンだけメール取り込みを実行。
+  const fetchBalance = useCallback((refresh = false) => callApi(refresh ? "?refresh=1" : ""), [callApi]);
 
   useEffect(() => {
     fetchBalance(false); // 開いたときは読むだけ（取り込みはしない）
   }, [fetchBalance]);
 
-  // ＋入金ボタン：金額を聞いて（初期値3万）入金を1件追加する。
-  const addIncome = useCallback(async () => {
+  const parseAmount = (input) => Math.round(Number(String(input).replace(/[^\d.-]/g, "")));
+
+  // ＋入金：金額を聞いて（初期値3万）残高に足す。
+  const addIncome = useCallback(() => {
     const input = window.prompt("入金額を入力（円）", "30000");
-    if (input == null) return; // キャンセル
-    const amount = Math.round(Number(input.replace(/[^\d.-]/g, "")));
-    if (!amount) {
-      window.alert("金額が正しくありません");
-      return;
-    }
-    setStatus("loading");
-    setError("");
-    try {
-      const res = await fetch(`/api/balance?action=addIncome&amount=${amount}`);
-      const json = await res.json();
-      if (json.error) throw new Error(json.error);
-      setData(json);
-      setStatus("idle");
-    } catch (e) {
-      setStatus("error");
-      setError(String(e.message || e));
-    }
-  }, []);
+    if (input == null) return;
+    const amount = parseAmount(input);
+    if (!amount) return window.alert("金額が正しくありません");
+    callApi(`?action=addIncome&amount=${amount}`);
+  }, [callApi]);
+
+  // －減らす：金額を聞いて残高から引く（押し間違いの取り消し用）。
+  const subtract = useCallback(() => {
+    const input = window.prompt("減らす金額を入力（円）", "30000");
+    if (input == null) return;
+    const amount = parseAmount(input);
+    if (!amount) return window.alert("金額が正しくありません");
+    callApi(`?action=subtract&amount=${amount}`);
+  }, [callApi]);
 
   const balance = data?.balance;
   const txs = data?.transactions || [];
+
+  // 残高を直接修正：今の残高を初期値にして、入れた金額に上書きする。
+  const editBalance = useCallback(() => {
+    const input = window.prompt("残高をいくらに直す？（円）", balance != null ? String(balance) : "");
+    if (input == null) return;
+    const amount = parseAmount(input);
+    if (!Number.isFinite(amount)) return window.alert("金額が正しくありません");
+    callApi(`?action=setBalance&amount=${amount}`);
+  }, [callApi, balance]);
 
   return (
     <div className="budget-card bank-card">
@@ -74,6 +81,12 @@ const BankBalanceCard = () => {
         <div className="bank-actions">
           <button className="btn-add" onClick={addIncome} disabled={status === "loading"}>
             ＋ 入金
+          </button>
+          <button className="btn-add" onClick={subtract} disabled={status === "loading"}>
+            － 減らす
+          </button>
+          <button className="btn-add" onClick={editBalance} disabled={status === "loading"}>
+            ✎ 残高修正
           </button>
           <button className="btn-add" onClick={() => fetchBalance(true)} disabled={status === "loading"}>
             {status === "loading" ? "更新中…" : "🔄 更新"}

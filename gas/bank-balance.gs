@@ -64,7 +64,11 @@ function doGet(e) {
   const p = (e && e.parameter) || {};
   let balance;
   if (p.action === 'addIncome') {
-    balance = addIncome_(p.amount);
+    balance = addManual_(p.amount, '入金');   // ＋入金：残高に足す
+  } else if (p.action === 'subtract') {
+    balance = addManual_(p.amount, '支出');   // －減らす：残高から引く（押し間違いの取り消し用）
+  } else if (p.action === 'setBalance') {
+    balance = setBalanceManual_(p.amount);    // 残高を直接この金額にセット
   } else if (p.refresh === '1') {
     balance = updateBalance();
   } else {
@@ -90,26 +94,40 @@ function doGet(e) {
   return json_({ balance, updatedAt: new Date().toISOString(), transactions: txs });
 }
 
-/** 「＋入金」ボタンの実体：入金を1件記録して残高に足す。
- *  入金ごとにユニークなキー(MANUAL-…)を付けるので、同じ金額でも何回でも追加できる。 */
-function addIncome_(amountParam) {
+/** 「＋入金」「－減らす」ボタンの実体：手動の取引を1件記録して残高を増減する。
+ *  type='入金'なら足す、'支出'なら引く。
+ *  ユニークなキー(MANUAL-…)を付けるので、同じ金額でも何回でも追加できる。 */
+function addManual_(amountParam, type) {
   const ss = SpreadsheetApp.getActive();
   const txSheet = ss.getSheetByName(TX_SHEET);
   ensureHeader_(txSheet);
 
-  let amount = Math.round(Number(amountParam));
-  if (!isFinite(amount) || amount === 0) amount = DEFAULT_INCOME;
+  let amount = Math.abs(Math.round(Number(amountParam)));
+  if (!isFinite(amount) || amount === 0) {
+    if (type === '入金') amount = DEFAULT_INCOME; // 入金は空なら初期値、減額は0なら何もしない
+    else return getBalance_();
+  }
 
   const now = new Date();
   const key = 'MANUAL-' + Utilities.formatDate(now, 'JST', 'yyyyMMddHHmmss');
+  const label = type === '入金' ? '入金（手動）' : '減額（手動）';
   txSheet.appendRow([
     Utilities.formatDate(now, 'JST', 'yyyy/MM/dd'),
-    '入金', amount, '入金（手動）', key
+    type, amount, label, key
   ]);
 
-  const balance = getBalance_() + amount;
+  const balance = getBalance_() + (type === '入金' ? amount : -amount);
   setBalance_(balance);
   return balance;
+}
+
+/** 残高を指定の金額に直接セットする（「残高を修正」ボタン用）。
+ *  取引は記録せず、残高そのものを上書き。ズレたとき一発で直せる。 */
+function setBalanceManual_(amountParam) {
+  const v = Math.round(Number(amountParam));
+  if (!isFinite(v)) return getBalance_(); // 数字でなければ何もしない
+  setBalance_(v);
+  return v;
 }
 
 /** 1日数回の自動実行トリガーを設定（最初に1回だけ実行する） */
